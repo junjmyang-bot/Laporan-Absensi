@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Processed output
+data/processed/
+
+# Optional: raw source files
+# data/raw/
