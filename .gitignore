@@ -1,0 +1,10 @@
+credentials*.json
+.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vscode/
+.DS_Store
+Thumbs.db
+.env

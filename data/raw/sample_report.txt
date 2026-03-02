@@ -1,0 +1,75 @@
+A. Laporan Absensi Team
+-> Durasi Lapor : 1 kali (Waktu Mulai Kerja)
+
+Tanggal : 24 / Feb /2026
+
+1. Nama MP / Shift : uyun (Shift 2)
+-> Main TL : Erika
+-> TL lain : Roswita
+ 
+
+2. Total : 43 pax + 3 tr   
+-> Masuk : 40 pax
+-> Training : 3 tr
+tr은 트레이닝이라는 뜻, 이거는 총 43명의 kupas member와 3명의 트레이닝이 있는데, 40명 kupas member + 3 트레이닝이 들어왔다는 뜻
+
+
+
+
+
+2-1. Detail Total Pax
+-> TL : 1 (Total masuk) / 1 (Total Orang di team) 
+-> AST : 9 (Total masuk) / 9 (Total Orang di team)
+-> AJ : 3 (Total masuk) / 3 (Total Orang di team)
+-> Biasa : 27 (Total masuk) / 30 (Total Orang di team)
+-> Training :3  (Total masuk) /  3(Total Orang di team)
+
+이거는 우리 회사의 직책별로 얼마나 사람들이 출근했는지 나오는거야. TL, AST, AJ BIASA TRAINING이지. 아까 위에 말한 KUPAS MEMBER = TL부터 BIASA까지 모두 합한거고
+27 (Total masuk) / 30 (Total Orang di team), 이거 왼쪽은 오늘 출근한 수, 오른쪽은 총 인원이 나온거
+
+
+
+3. Jam Masuk : 20:00 (업무 시작시간) 
+4. Jam Pulang : 06:30 (오늘 업무 종료시간)
+ 
+
+5. Telat : 
+-> wali murid :  
+-> Ban Bocor : 
+-> Sepeda Dipakai  : 
+-> Sakit : 
+-> Lain-lain : 1 pax (Eka puji /biasa/bangun terlambat)
+
+이건 늦는사람들이 있을때 작성하는거야. TELAT : 옆에는 토탈 인원이 들어가야하고, 밑에는 늦는 이유들임.  
+
+                    
+
+
+
+6. Tidak Masuk : 3 pax
+-> Ijin : 1 pax
+( deny / biasa / menjaga bapak sakit) 
+             
+
+-> Sakit : 2 pax
+    (Ike swandari /biasa/maag) 
+    (Nadia/biasa/kecelakaan)
+   
+
+   
+-> libur :
+   
+
+-> Lain-lain :
+  
+이거도 마찬가지야, 위에 총 안들어온 사람이 몇명이고 IJIN, SAKIT, LIBUR, LAIN-LAIN 이유로 안들어온사람들이 각각 얼마인지 적는거지
+
+7. Tidak Masuk Tanpa Keterangan :
+
+-> 이건 통보없이 안들어온사람들
+
+8. Resign :
+
+-> 이건 퇴직한사람들 나오는거고...
+
+지금 직원들은 작성하지 않아도 되는곳은 편의상 비워놨어. 아마 이걸 쓰기가 불편해서 그렇겠지
