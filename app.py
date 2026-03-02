@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from zoneinfo import ZoneInfo
 
 import requests
 import streamlit as st
@@ -26,6 +27,7 @@ ROLE_KEY_MAP = {
 TELAT_REASONS = ["wali murid", "ban bocor", "sepeda dipakai", "sakit", "lain-lain"]
 TIDAK_MASUK_REASONS = ["ijin", "sakit", "libur", "lain-lain"]
 SEND_COOLDOWN_SECONDS = 60
+REPORT_TIMEZONE = os.getenv("REPORT_TIMEZONE", "Asia/Jakarta")
 # Runtime in-memory store: sender -> last successful send time.
 # Works across sessions in the same Streamlit process.
 LAST_SEND_AT_BY_SENDER: dict[str, dt.datetime] = {}
@@ -72,6 +74,14 @@ def get_sender_cooldown_error(sender_name: str, cooldown_seconds: int = SEND_COO
     if remain > 0:
         return f"Batas kirim aktif untuk '{sender_name.strip()}'. Coba lagi {remain} detik."
     return ""
+
+
+def get_report_timestamp() -> str:
+    try:
+        now = dt.datetime.now(ZoneInfo(REPORT_TIMEZONE))
+    except Exception:
+        now = dt.datetime.now()
+    return now.strftime("%d / %b / %Y %H:%M:%S %Z")
 
 
 def _init_list_state(key: str):
@@ -278,6 +288,7 @@ def build_laporan_absensi_team_message(form: dict) -> str:
     lines.append("-> Durasi Lapor : 1 kali (Waktu Mulai Kerja)")
     lines.append("")
     lines.append(f"Tanggal : {form['tanggal']}")
+    lines.append(f"Waktu Lapor : {form['waktu_lapor']}")
     lines.append("")
     lines.append(f"0. Department : {form['department']}")
     lines.append("")
@@ -449,6 +460,7 @@ with tab1:
         jam_masuk = st.text_input("Jam Masuk (HH:MM)", value="20:00", key="f_jam_masuk")
     with j2:
         jam_pulang = st.text_input("Jam Pulang (HH:MM)", value="06:30", key="f_jam_pulang")
+    st.caption("Waktu Lapor dicatat otomatis saat kirim (server time), tidak bisa diinput manual.")
 
     default_role = _first_role(enabled_roles)
 
@@ -667,7 +679,8 @@ with tab1:
         ],
     }
 
-    message = build_laporan_absensi_team_message(form)
+    preview_form = {**form, "waktu_lapor": get_report_timestamp()}
+    message = build_laporan_absensi_team_message(preview_form)
 
     st.divider()
     st.subheader("Preview (Telegram message)")
@@ -680,7 +693,9 @@ with tab1:
             st.error(cooldown_error)
 
     if st.button("Send to Telegram", key="f_send_btn", disabled=not can_submit):
-        ok, info = send_telegram_message(message)
+        send_form = {**form, "waktu_lapor": get_report_timestamp()}
+        send_message = build_laporan_absensi_team_message(send_form)
+        ok, info = send_telegram_message(send_message)
         if ok:
             LAST_SEND_AT_BY_SENDER[sender_name.strip().lower()] = dt.datetime.now()
             st.success(info)
