@@ -24,7 +24,7 @@ ROLE_KEY_MAP = {
     "Training": "TR",
 }
 
-TELAT_REASONS = ["wali murid", "ban bocor", "sepeda dipakai", "sakit", "lain-lain"]
+TELAT_REASONS = ["sepeda dipakai", "sakit", "lain-lain"]
 TIDAK_MASUK_REASONS = ["ijin", "sakit", "libur", "lain-lain"]
 SEND_COOLDOWN_SECONDS = 60
 REPORT_TIMEZONE = os.getenv("REPORT_TIMEZONE", "Asia/Jakarta")
@@ -62,7 +62,7 @@ def send_telegram_message(text: str) -> tuple[bool, str]:
 def get_sender_cooldown_error(sender_name: str, cooldown_seconds: int = SEND_COOLDOWN_SECONDS) -> str:
     sender = (sender_name or "").strip().lower()
     if not sender:
-        return "Nama pengirim wajib diisi untuk batas kirim 1 menit."
+        return "Nama pelapor wajib diisi untuk batas kirim 1 menit."
 
     last_sent_at = LAST_SEND_AT_BY_SENDER.get(sender)
     if not last_sent_at:
@@ -224,10 +224,6 @@ def aggregate_telat(telat_rows: list[dict]) -> dict:
 
     return {
         "total": len(telat_rows),
-        "wali_murid": len(buckets["wali murid"]),
-        "wali_murid_detail": [x for x in buckets["wali murid"] if x],
-        "ban_bocor": len(buckets["ban bocor"]),
-        "ban_bocor_detail": [x for x in buckets["ban bocor"] if x],
         "sepeda": len(buckets["sepeda dipakai"]),
         "sepeda_detail": [x for x in buckets["sepeda dipakai"] if x],
         "sakit": len(buckets["sakit"]),
@@ -312,10 +308,6 @@ def build_laporan_absensi_team_message(form: dict) -> str:
     lines.append("")
 
     lines.append(f"5. Telat : {telat['total']} pax")
-    lines.append(f"-> wali murid : {telat['wali_murid']} pax")
-    _append_vertical_detail(lines, telat["wali_murid_detail"])
-    lines.append(f"-> Ban Bocor : {telat['ban_bocor']} pax")
-    _append_vertical_detail(lines, telat["ban_bocor_detail"])
     lines.append(f"-> Sepeda Dipakai : {telat['sepeda']} pax")
     _append_vertical_detail(lines, telat["sepeda_detail"])
     lines.append(f"-> Sakit : {telat['sakit']} pax")
@@ -343,7 +335,11 @@ def build_laporan_absensi_team_message(form: dict) -> str:
 
     lines.append(f"8. Resign : {len(resign_rows)} pax")
     if resign_rows:
-        details = [f"{r['nama'].strip()} - {r['jabatan']}" for r in resign_rows if r.get("nama") and r.get("jabatan")]
+        details = [
+            f"{r['nama'].strip()} - {r['jabatan']} - notif: {str(r.get('notif', 'No')).strip()}"
+            for r in resign_rows
+            if r.get("nama") and r.get("jabatan")
+        ]
         _append_vertical_detail(lines, details)
 
     return "\n".join(lines)
@@ -376,7 +372,7 @@ with tab1:
     with c2:
         tl_lain = st.text_input("TL lain (comma)", value="", key="f_tl_lain")
     with c3:
-        sender_name = st.text_input("Nama Pengirim", value="", key="f_sender_name")
+        sender_name = st.text_input("Nama Pelapor", value="", key="f_sender_name")
 
     enabled_roles = st.multiselect(
         "Enabled Roles (untuk breakdown + pilihan jabatan input)",
@@ -465,23 +461,17 @@ with tab1:
     default_role = _first_role(enabled_roles)
 
     st.markdown("### 5) Telat")
-    btns = st.columns(5)
-    if btns[0].button("+ Wali Murid", key="btn_add_telat_wali"):
-        add_row("telat_rows", {"nama": "", "jabatan": default_role, "eta": "", "reason": "wali murid", "ket": ""})
-    if btns[1].button("+ Ban Bocor", key="btn_add_telat_ban"):
-        add_row("telat_rows", {"nama": "", "jabatan": default_role, "eta": "", "reason": "ban bocor", "ket": ""})
-    if btns[2].button("+ Sepeda", key="btn_add_telat_sepeda"):
+    btns = st.columns(3)
+    if btns[0].button("+ Sepeda", key="btn_add_telat_sepeda"):
         add_row("telat_rows", {"nama": "", "jabatan": default_role, "eta": "", "reason": "sepeda dipakai", "ket": ""})
-    if btns[3].button("+ Sakit", key="btn_add_telat_sakit"):
+    if btns[1].button("+ Sakit", key="btn_add_telat_sakit"):
         add_row("telat_rows", {"nama": "", "jabatan": default_role, "eta": "", "reason": "sakit", "ket": ""})
-    if btns[4].button("+ Lain-lain", key="btn_add_telat_other"):
+    if btns[2].button("+ Lain-lain", key="btn_add_telat_other"):
         add_row("telat_rows", {"nama": "", "jabatan": default_role, "eta": "", "reason": "lain-lain", "ket": ""})
 
     telat_agg_preview = aggregate_telat(st.session_state["telat_rows"])
     st.write(
         f"Telat total: **{telat_agg_preview['total']} pax** | "
-        f"Wali murid: **{telat_agg_preview['wali_murid']}** | "
-        f"Ban bocor: **{telat_agg_preview['ban_bocor']}** | "
         f"Sepeda: **{telat_agg_preview['sepeda']}** | "
         f"Sakit: **{telat_agg_preview['sakit']}** | "
         f"Lain-lain: **{telat_agg_preview['lain_lain']}**"
@@ -612,10 +602,10 @@ with tab1:
     st.markdown("### 8) Resign")
     st.write(f"Total Resign: **{len(st.session_state['resign_rows'])} pax**")
     if st.button("+ Tambah Resign", key="btn_add_rs"):
-        add_row("resign_rows", {"nama": "", "jabatan": default_role})
+        add_row("resign_rows", {"nama": "", "jabatan": default_role, "notif": "No"})
 
     for r in list(st.session_state["resign_rows"]):
-        cols = st.columns([3.0, 2.0, 0.7])
+        cols = st.columns([2.6, 1.7, 1.6, 0.7])
         with cols[0]:
             r["nama"] = st.text_input("Nama", value=r.get("nama", ""), key=f"rs_nama_{r['_id']}")
         with cols[1]:
@@ -628,6 +618,15 @@ with tab1:
                 key=f"rs_jabatan_{r['_id']}",
             )
         with cols[2]:
+            notif_options = ["Yes", "No"]
+            current_notif = r.get("notif") if r.get("notif") in notif_options else "No"
+            r["notif"] = st.selectbox(
+                "Sudah kasih notif?",
+                notif_options,
+                index=notif_options.index(current_notif),
+                key=f"rs_notif_{r['_id']}",
+            )
+        with cols[3]:
             if st.button("Hapus", key=f"rs_del_{r['_id']}"):
                 delete_row("resign_rows", r["_id"])
                 st.rerun()
@@ -674,7 +673,11 @@ with tab1:
             for r in st.session_state["tanpa_keterangan_rows"]
         ],
         "resign_rows": [
-            {"nama": r.get("nama", "").strip(), "jabatan": r.get("jabatan", "")}
+            {
+                "nama": r.get("nama", "").strip(),
+                "jabatan": r.get("jabatan", ""),
+                "notif": r.get("notif", "No"),
+            }
             for r in st.session_state["resign_rows"]
         ],
     }
